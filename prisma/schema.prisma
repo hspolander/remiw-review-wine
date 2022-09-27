@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model WineUser {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  username     String   @unique
+  name         String
+  passwordHash String
+  reviews      Review[]
+}
+
+model Wine {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  boughtFrom  String?
+  country     String?
+  color       String?
+  grapes      WineGrape[]
+  name        String
+  priceBottle Int?
+  producer    String?
+  url         String?
+  vintage     Int?
+  reviews     Review[]
+  sysWineId   String? @unique
+  sysWine     SystembolagetWine?   @relation(fields: [sysWineId], references: [productId])
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  comment     String
+  score       Int
+  wine        Wine @relation(fields: [wineId], references: [id], onDelete: Cascade)
+  wineId      String
+  reviewer    WineUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+}
+
+model SystembolagetWine {
+  productId                 String @id
+  alcoholPercentage         Float?
+  assortmentText            String?
+  bottleText                String?
+  categoryLevel1            String
+  categoryLevel2            String
+  categoryLevel3            String?
+  categoryLevel4            String?
+  color                     String?
+  country                   String
+  customCategoryTitle       String?
+  grapes                    SystembolagetGrape[]
+  image                     String?
+  isOrganic                 Boolean?
+  isSustainableChoice       Boolean?
+  isClimateSmartPackaging   Boolean?
+  originLevel1              String?
+  originLevel2              String?
+  packagingLevel1           String?
+  price                     Float?
+  producerName              String?
+  productLaunchDate         DateTime?
+  productNameBold           String?
+  productNameThin           String?
+  productNumber             String?
+  productNumberShort        String?
+  sugarContent              Float?
+  sugarContentGramPer100ml  Float?
+  supplierName              String?
+  taste                     String?
+  tasteClockBitter          Int?
+  tasteClockBody            Int?
+  tasteClockCasque          Int?
+  tasteClockFruitacid       Int?
+  tasteClockRoughness       Int?
+  tasteClockSmokiness       Int?
+  tasteClockSweetness       Int?
+  tasteSymbol               SystembolagetTasteSymbol[]
+  usage                     String?
+  vintage                   Int?
+  volume                    Float?
+  volumeText                String?
+  wine                      Wine?
+}
+
+model SystembolagetGrape {
+  id          String   @id @default(uuid())
+  name        String
+  sysWine     SystembolagetWine @relation(fields: [sysWineId], references: [productId], onDelete: Cascade)
+  sysWineId   String
+}
+
+model SystembolagetTasteSymbol {
+  id          String   @id @default(uuid())
+  symbol      String
+  sysWine     SystembolagetWine @relation(fields: [sysWineId], references: [productId], onDelete: Cascade)
+  sysWineId   String
+}
+
+model WineGrape {
+  id      String   @id @default(uuid())
+  name    String
+  wine    Wine @relation(fields: [wineId], references: [id], onDelete: Cascade)
+  wineId  String
+}
+
