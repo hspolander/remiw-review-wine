@@ -8,6 +8,16 @@ type LoaderData = { review: Review };
 export let loader: LoaderFunction = async ({ params }) => {
   console.log({ params });
   let review = await db.review.findUnique({
+    include: {
+      wine: {
+        include: {
+          sysWine: true,
+        },
+      },
+      reviewer: {
+        select: { name: true },
+      },
+    },
     where: { id: params.review },
   });
   if (!review) {
@@ -20,7 +30,7 @@ export let loader: LoaderFunction = async ({ params }) => {
 };
 
 export default function ReviewRoute() {
-  let data = useLoaderData<LoaderData>();
+  const data = useLoaderData<LoaderData>();
 
   return <div>{data.review.comment}</div>;
 }
