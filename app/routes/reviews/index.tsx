@@ -1,3 +1,9 @@
-export default function ReviewsIndexroute() {
-  return <div></div>;
+import { Outlet } from "@remix-run/react";
+
+export default function ReviewsIndexRoute() {
+  return (
+    <div>
+      <Outlet />
+    </div>
+  );
 }

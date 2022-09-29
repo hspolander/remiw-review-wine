@@ -6,7 +6,6 @@ import { db } from "~/utils/db.server";
 type LoaderData = { review: Review };
 
 export let loader: LoaderFunction = async ({ params }) => {
-  console.log({ params });
   let review = await db.review.findUnique({
     include: {
       wine: {
@@ -29,7 +28,7 @@ export let loader: LoaderFunction = async ({ params }) => {
   return data;
 };
 
-export default function ReviewRoute() {
+export default function UserReview() {
   const data = useLoaderData<LoaderData>();
 
   return <div>{data.review.comment}</div>;
