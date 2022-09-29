@@ -1,12 +1,22 @@
-import type { Review } from "@prisma/client";
+import type { Review, SystembolagetWine, Wine } from "@prisma/client";
 import type { LoaderFunction } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
+import type { SerializedStateDates } from "types/generic";
 import { db } from "~/utils/db.server";
+import whiteGlass from "~/images/white-glass.jpg";
+import redGlass from "~/images/red-glass.jpg";
+import roseGlass from "~/images/rose-glass.png";
 
-type LoaderData = { review: Review };
-
+type LoaderData = SerializedStateDates<Review> & {
+  wine: SerializedStateDates<Wine> & {
+    sysWine: SerializedStateDates<SystembolagetWine> | null;
+  };
+  reviewer: {
+    name: string;
+  };
+};
 export let loader: LoaderFunction = async ({ params }) => {
-  let review = await db.review.findUnique({
+  const review = await db.review.findUnique({
     include: {
       wine: {
         include: {
@@ -24,12 +34,41 @@ export let loader: LoaderFunction = async ({ params }) => {
       status: 404,
     });
   }
-  let data: LoaderData = { review };
-  return data;
+  return review;
 };
 
 export default function UserReview() {
-  const data = useLoaderData<LoaderData>();
+  const review = useLoaderData<LoaderData>();
 
-  return <div>{data.review.comment}</div>;
+  const getwineImage = (color: string | null) => {
+    switch (color) {
+      case "Rött":
+        return redGlass;
+      case "Vitt":
+        return whiteGlass;
+
+      case "Rosévin":
+        return roseGlass;
+
+      default:
+        return whiteGlass;
+    }
+  };
+  const image = review.wine.sysWine?.image || getwineImage(review.wine.color);
+
+  return (
+    <div className="relative max-w-md mx-auto xl:max-w-2xl min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded-xl mt-16">
+      <div className="card">
+        <div className="card-body">
+          <Link to="#">
+            <h4 className="font-semibold">{review.wine.name}</h4>
+          </Link>
+          <p className="opcacity-60 mb-4">{review.comment}</p>
+        </div>
+        <div className="card-header mx-4 -mt-6">
+          <img className=" rounded-lg" src={image} alt="tailwind-card" />
+        </div>
+      </div>
+    </div>
+  );
 }
