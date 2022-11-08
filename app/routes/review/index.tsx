@@ -11,15 +11,21 @@ type LoaderData = SystembolagetWine[];
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
 
-  const categoryLevel2 = url.searchParams.get("categoryLevel2") || "";
-  const country = url.searchParams.get("country") || "";
+  const categoryLevel2 = url.searchParams.getAll("categoryLevel2");
+  const countries = url.searchParams.getAll("country");
   const name = url.searchParams.get("name") || "";
 
   const systembolagetWines = await db.systembolagetWine.findMany({
     where: {
       AND: [
-        { categoryLevel2: { contains: categoryLevel2 } },
-        { country: { contains: country } },
+        { ...(categoryLevel2?.length > 0
+          ? { categoryLevel2: { in: categoryLevel2 } }
+          : {}
+        )},
+        { ...(countries?.length > 0
+          ? { country: { in: countries } }
+          : {}
+        )},
         {
           OR: [
             { productNameBold: { contains: name } },
@@ -46,13 +52,13 @@ export default function ReviewIndexRoute() {
     }
   };
 
-  const getHeader = (productNameBold, productNameThin) => {
+  const getHeader = (productNameBold: string | null, productNameThin: string | null) => {
     const name1 = productNameBold && productNameBold.trim();
     const name2 = productNameThin ? `, ${productNameThin}` : "";
     return name1 + name2;
   };
 
-  const getSubHeader = (categoryLevel2, categoryLevel3, vintage) => {
+  const getSubHeader = (categoryLevel2: string, categoryLevel3: string | null, vintage: number | null) => {
     const type = categoryLevel2 ?? "";
     const subType = categoryLevel3 ? `, ${categoryLevel3}` : "";
     const year = vintage ? `, ${vintage}` : "";
